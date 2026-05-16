@@ -76,13 +76,34 @@ function deepseek-code {
 #             VS Code'u yeniden yükler. Extension varsayılan Claude'a döner.
 # Not      : .vscode içinde başka ayarlarınız varsa onlar da silinir.
 function deepseek-code-del {
-    $vscodeDir = Join-Path (Get-Location) ".vscode"
+    $settingsFile = Join-Path (Get-Location) ".vscode\settings.json"
 
-    if (Test-Path $vscodeDir) {
-        Remove-Item -Recurse -Force $vscodeDir
-        Write-Host ".vscode klasörü silindi."
+    if (-not (Test-Path $settingsFile)) {
+        Write-Host ".vscode\settings.json bulunamadi, yapilacak bir sey yok." -ForegroundColor Gray
     } else {
-        Write-Host ".vscode klasörü zaten yok."
+        $settings = Get-Content $settingsFile -Raw | ConvertFrom-Json
+
+        if ($settings.PSObject.Properties.Name -contains "claudeCode.environmentVariables") {
+            $settings.PSObject.Properties.Remove("claudeCode.environmentVariables")
+            $remaining = $settings.PSObject.Properties.Name
+
+            if ($remaining.Count -eq 0) {
+                Remove-Item $settingsFile -Force
+                # .vscode klasörü boşsa onu da temizle
+                $vscodeDir = Join-Path (Get-Location) ".vscode"
+                if ((Get-ChildItem $vscodeDir -Force | Measure-Object).Count -eq 0) {
+                    Remove-Item $vscodeDir -Force
+                    Write-Host ".vscode klasoru bosaldi, silindi." -ForegroundColor Gray
+                } else {
+                    Write-Host "settings.json silindi (.vscode diger dosyalari korundu)." -ForegroundColor Green
+                }
+            } else {
+                $settings | ConvertTo-Json -Depth 10 | Out-File -FilePath $settingsFile -Encoding utf8
+                Write-Host "DeepSeek ayarlari kaldirildi, diger ayarlar korundu." -ForegroundColor Green
+            }
+        } else {
+            Write-Host "settings.json'da DeepSeek ayari bulunamadi, yapilacak bir sey yok." -ForegroundColor Gray
+        }
     }
 
     Save-VSCodeFiles
