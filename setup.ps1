@@ -104,9 +104,40 @@ if ($preload -eq "e") {
     Write-Host "[OK] houtini-lm hazir." -ForegroundColor Green
 }
 
+# 8. PowerShell profil komutlarını kur (deepseek, deepseek-code, deepseek-code-del)
+Write-Host ""
+$installProfile = Read-Host "Terminal komutlari kurulsun mu? deepseek / deepseek-code / deepseek-code-del (e/h, onerilir)"
+if ($installProfile -eq "e") {
+    $profilePath = $PROFILE.CurrentUserAllHosts
+    $profileDir  = Split-Path $profilePath
+
+    if (-not (Test-Path $profileDir)) {
+        New-Item -ItemType Directory -Force $profileDir | Out-Null
+    }
+
+    $profileSnippet = Get-Content (Join-Path $PSScriptRoot "powershell-profile.ps1") -Raw
+    $profileSnippet = $profileSnippet -replace 'YOUR_DEEPSEEK_API_KEY', $apiKey
+
+    if (Test-Path $profilePath) {
+        $existing = Get-Content $profilePath -Raw
+        if ($existing -match "deepseek") {
+            Write-Host "Profilde zaten deepseek komutlari var, atlanıyor." -ForegroundColor Gray
+        } else {
+            Add-Content -Path $profilePath -Value "`n$profileSnippet"
+            Write-Host "[OK] Komutlar profile eklendi: $profilePath" -ForegroundColor Green
+        }
+    } else {
+        $profileSnippet | Out-File -FilePath $profilePath -Encoding utf8
+        Write-Host "[OK] Profil olusturuldu: $profilePath" -ForegroundColor Green
+    }
+    Write-Host "     Yeni terminalde 'deepseek', 'deepseek-code', 'deepseek-code-del' kullanilabilir." -ForegroundColor Gray
+}
+
 Write-Host ""
 Write-Host "=== Kurulum tamamlandi! ===" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Simdi herhangi bir klasorde 'claude' yazarak baslayabilirsiniz." -ForegroundColor White
-Write-Host "MD dosyasi verdiginizde Claude otomatik analiz edip paralel gorev dagitimi yapacak." -ForegroundColor White
+Write-Host "  claude            -> Mimar modu (Claude + DeepSeek)" -ForegroundColor White
+Write-Host "  deepseek          -> Terminalde tamamen DeepSeek" -ForegroundColor White
+Write-Host "  deepseek-code     -> VS Code'u DeepSeek'e bagla" -ForegroundColor White
+Write-Host "  deepseek-code-del -> VS Code'u varsayilan Claude'a dondur" -ForegroundColor White
 Write-Host ""

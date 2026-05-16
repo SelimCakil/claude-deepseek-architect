@@ -29,36 +29,83 @@ Sen → MD dosyası ver → Claude analiz eder
 |---|---|---|
 | Node.js | 18+ | [nodejs.org](https://nodejs.org) |
 | Claude Code | Güncel | [claude.ai/code](https://claude.ai/code) |
+| VS Code | Güncel | [code.visualstudio.com](https://code.visualstudio.com) |
 | DeepSeek API key | — | [platform.deepseek.com](https://platform.deepseek.com) |
+
+---
+
+## Terminal Komutları
+
+Bu komutlar PowerShell profiline eklenir ve her terminalda hazır gelir.  
+Kaynak: [`powershell-profile.ps1`](./powershell-profile.ps1)
+
+### `deepseek`
+
+```powershell
+deepseek
+```
+
+**Ne yapar:** Terminalde Claude Code'u açar, ancak tüm API çağrıları DeepSeek'e gider.  
+Claude kotanız harcanmaz. Model olarak `deepseek-v4-pro` kullanılır.
+
+**Nasıl çalışır:** `ANTHROPIC_BASE_URL` ortam değişkenini DeepSeek endpoint'ine
+(`https://api.deepseek.com/anthropic`) yönlendirir ve ayrı bir config profili kullanır.
+Claude Code arayüzü aynı kalır, sadece arka plandaki model değişir.
+
+---
+
+### `deepseek-code`
+
+```powershell
+cd proje-dizini
+deepseek-code
+```
+
+**Ne yapar:** VS Code'daki Claude Code extension'ını DeepSeek'e bağlar.  
+Proje dizinine `.vscode/settings.json` oluşturur ve VS Code'u yeniden yükler.
+Bu projede VS Code Chat (Ctrl+Shift+P → Claude) artık DeepSeek kullanır.
+
+**Kapsamı:** Sadece bu proje — diğer projeleri etkilemez.
+
+---
+
+### `deepseek-code-del`
+
+```powershell
+cd proje-dizini
+deepseek-code-del
+```
+
+**Ne yapar:** `deepseek-code` tarafından oluşturulan `.vscode` klasörünü siler,
+VS Code'u yeniden yükler. Extension varsayılan Claude'a geri döner.
+
+> **Not:** `.vscode` içinde başka ayarlarınız varsa onlar da silinir.
 
 ---
 
 ## Kurulum
 
-### Windows
+### Windows (Otomatik)
 
 ```powershell
 .\setup.ps1
-```
-
-### Linux / macOS
-
-```bash
-bash setup.sh
 ```
 
 Script şunları yapar:
 1. `CLAUDE.md` dosyasını `~/.claude/CLAUDE.md` konumuna kopyalar
 2. `houtini-lm` MCP sunucusunu API key ile yapılandırır
 3. Claude Code izinlerini ayarlar
+4. PowerShell profil komutlarını kurar (`deepseek`, `deepseek-code`, `deepseek-code-del`)
 
----
+### Linux / macOS (Otomatik)
 
-## Manuel Kurulum
+```bash
+bash setup.sh
+```
 
-### 1. CLAUDE.md
+### Manuel Kurulum
 
-`CLAUDE.md` dosyasını global Claude konumuna kopyalayın:
+**1. CLAUDE.md — Global mimar talimatları**
 
 ```powershell
 # Windows
@@ -70,7 +117,7 @@ Copy-Item CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
 cp CLAUDE.md ~/.claude/CLAUDE.md
 ```
 
-### 2. MCP Sunucu Ayarları
+**2. MCP Sunucu — houtini-lm**
 
 `~/.claude/settings.json` dosyasına ekleyin:
 
@@ -90,23 +137,35 @@ cp CLAUDE.md ~/.claude/CLAUDE.md
 }
 ```
 
----
+**3. PowerShell Profil Komutları**
 
-## Kullanım
+`powershell-profile.ps1` içeriğini PowerShell profilinize ekleyin:
 
-1. Herhangi bir klasörde terminali açın
-2. `claude` yazın
-3. Bir MD dosyası verin veya içeriğini yapıştırın
-4. Claude otomatik olarak:
-   - Görevleri analiz eder
-   - Bağımsız parçaları paralel olarak DeepSeek'e devreder
-   - Sonuçları birleştirip size sunar
+```powershell
+# Profil dosyasını aç
+notepad $PROFILE
 
-**Paralel yap" demenize gerek yok — mimar kararı kendisi verir.**
+# Veya doğrudan ekle (API key'i doldurarak)
+Get-Content .\powershell-profile.ps1 >> $PROFILE
+```
 
 ---
 
-## DeepSeek Araçları
+## Kullanım Senaryoları
+
+| Senaryo | Komut |
+|---|---|
+| Terminal'de DeepSeek ile çalış | `deepseek` |
+| VS Code'da DeepSeek'e geç | `deepseek-code` |
+| VS Code'u varsayılan Claude'a döndür | `deepseek-code-del` |
+| MD dosyası analizi + paralel görev | `claude` → MD ver |
+| Sınırlı kod görevi (kota tasarrufu) | `claude` → Claude DeepSeek'e devreder |
+
+---
+
+## DeepSeek MCP Araçları (Claude içinden)
+
+Claude, `claude` komutuyla açıldığında aşağıdaki araçlarla DeepSeek'e görev devreder:
 
 | Araç | Ne Zaman |
 |---|---|
