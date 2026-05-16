@@ -1,0 +1,16 @@
+# API key ve hassas dosyalar
+.env
+.env.*
+*.local
+
+# Claude session dosyaları
+.claude/sessions/
+.claude/history/
+summary_session.md
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db

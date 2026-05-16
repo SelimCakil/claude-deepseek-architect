@@ -1,0 +1,22 @@
+{
+  "theme": "dark-daltonized",
+  "mcpServers": {
+    "houtini-lm": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@houtini/lm"],
+      "env": {
+        "HOUTINI_LM_ENDPOINT_URL": "https://api.deepseek.com",
+        "HOUTINI_LM_API_KEY": "${DEEPSEEK_API_KEY}"
+      }
+    }
+  },
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Command *)",
+      "PowerShell(New-Item *)",
+      "PowerShell(. $PROFILE)",
+      "mcp__houtini-lm__discover"
+    ]
+  }
+}
